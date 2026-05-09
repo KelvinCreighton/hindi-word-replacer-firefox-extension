@@ -16,6 +16,22 @@
     "NOSCRIPT", "IFRAME", "SELECT", "BUTTON", "LABEL"
   ]);
 
+  /**
+   * Determines if a node or any of its ancestors are editable or should be skipped.
+   */
+  function shouldSkipNode(node) {
+    let curr = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+    while (curr && curr !== document.documentElement) {
+      if (SKIP_TAGS.has(curr.tagName)) return true;
+      if (curr.isContentEditable) return true;
+      const role = curr.getAttribute("role");
+      if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+      if (curr.classList.contains("hindi-replacer-word")) return true;
+      curr = curr.parentElement;
+    }
+    return false;
+  }
+
   // Build a single regex that matches any of the words in WORD_MAP.
   // Sort keys by length (descending) to ensure longer phrases match first.
   const keys = Object.keys(WORD_MAP).sort((a, b) => b.length - a.length);
@@ -33,6 +49,9 @@
   // Splits a text node into a fragment of text + <span> nodes.
   // -------------------------------------------------------------------
   function replaceInTextNode(textNode) {
+    // Safety check: ensure the node still has a parent and we should process it
+    if (!textNode.parentNode || shouldSkipNode(textNode)) return;
+
     const original = textNode.nodeValue;
     if (!pattern.test(original)) return; 
     pattern.lastIndex = 0;               
@@ -76,24 +95,23 @@
       fragment.appendChild(document.createTextNode(original.slice(lastIndex)));
     }
 
-    textNode.parentNode.replaceChild(fragment, textNode);
+    if (textNode.parentNode) {
+      textNode.parentNode.replaceChild(fragment, textNode);
+    }
   }
 
   // -------------------------------------------------------------------
   // DOM walker — visits every text node, skips unwanted tags
   // -------------------------------------------------------------------
   function walk(root) {
+    if (shouldSkipNode(root)) return;
+
     const walker = document.createTreeWalker(
       root,
       NodeFilter.SHOW_TEXT,
       {
         acceptNode: function(node) {
-          // Skip if parent is a forbidden tag
-          if (SKIP_TAGS.has(node.parentNode.tagName)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          // Skip if already processed or inside a processed span
-          if (node.parentNode.classList.contains("hindi-replacer-word")) {
+          if (shouldSkipNode(node)) {
             return NodeFilter.FILTER_REJECT;
           }
           // Only process nodes with actual text
@@ -138,11 +156,7 @@
           if (node.nodeType === Node.ELEMENT_NODE) {
             walk(node);
           } else if (node.nodeType === Node.TEXT_NODE) {
-            // Check if parent is valid before processing
-            if (!SKIP_TAGS.has(node.parentNode?.tagName) && 
-                !node.parentNode?.classList.contains("hindi-replacer-word")) {
-              replaceInTextNode(node);
-            }
+            replaceInTextNode(node);
           }
         }
       }
