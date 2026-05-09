@@ -1,0 +1,1 @@
+# hindi-word-replacer-firefox-extension
