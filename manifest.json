@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "Hindi Word Replacer",
+  "version": "1.0.0",
+  "description": "Replaces English words on webpages with their Hindi equivalents.",
+
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["words.js", "content.js"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Hindi Word Replacer"
+  }
+}
