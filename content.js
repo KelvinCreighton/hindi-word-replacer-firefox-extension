@@ -8,7 +8,35 @@
   // --- Config ---
   const SHOW_TOOLTIP  = true;   // Show romanized Hindi on hover
   const HIGHLIGHT     = true;   // Wrap replaced words in a styled <span>
-  const STORAGE_KEY   = "hindiReplacerEnabled";
+  const STORAGE_KEY = "hindiReplacerEnabled";
+  const MODE_KEY    = "hindiReplacerMode";
+
+  let activeMap = {};
+  let pattern = null;
+
+  /**
+   * Builds the active word map and regex pattern based on difficulty.
+   */
+  function initPattern(mode) {
+    if (mode === "easy") {
+      activeMap = { ...EASY_WORDS };
+    } else if (mode === "hard") {
+      activeMap = { ...EASY_WORDS, ...NORMAL_WORDS, ...HARD_WORDS };
+    } else {
+      // Default to normal
+      activeMap = { ...EASY_WORDS, ...NORMAL_WORDS };
+    }
+
+    const keys = Object.keys(activeMap).sort((a, b) => b.length - a.length);
+    pattern = new RegExp(
+      "(?:^|(?<=[^a-zA-Z0-9]))(" + keys.map(escapeRegex).join("|") + ")(?=[^a-zA-Z0-9]|$)",
+      "gi"
+    );
+  }
+
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
 
   // Tags whose text content we must NOT touch
   const SKIP_TAGS = new Set([
@@ -32,25 +60,13 @@
     return false;
   }
 
-  // Build a single regex that matches any of the words in WORD_MAP.
-  // Sort keys by length (descending) to ensure longer phrases match first.
-  const keys = Object.keys(WORD_MAP).sort((a, b) => b.length - a.length);
-  const pattern = new RegExp(
-    "\\b(" + keys.map(escapeRegex).join("|") + ")\\b",
-    "gi"
-  );
-
-  function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-
   // -------------------------------------------------------------------
   // Core replacement logic
   // Splits a text node into a fragment of text + <span> nodes.
   // -------------------------------------------------------------------
   function replaceInTextNode(textNode) {
     // Safety check: ensure the node still has a parent and we should process it
-    if (!textNode.parentNode || shouldSkipNode(textNode)) return;
+    if (!textNode.parentNode || shouldSkipNode(textNode) || !pattern) return;
 
     const original = textNode.nodeValue;
     if (!pattern.test(original)) return; 
@@ -63,7 +79,7 @@
     while ((match = pattern.exec(original)) !== null) {
       const word      = match[0];
       const wordLower = word.toLowerCase();
-      const entry     = WORD_MAP[wordLower];
+      const entry     = activeMap[wordLower];
       if (!entry) continue;
 
       // Text before this match
@@ -75,7 +91,7 @@
 
       // The replacement node
       const span = document.createElement("span");
-      span.textContent = entry; // Corrected: entry is now just the Hinglish string
+      span.textContent = entry;
       span.className = HIGHLIGHT ? "hindi-replacer-word" : "";
       
       if (SHOW_TOOLTIP) {
@@ -180,9 +196,12 @@
   // Use 'chrome' or 'browser' depending on environment
   const api = typeof browser !== "undefined" ? browser : chrome;
 
-  api.storage.local.get(STORAGE_KEY, (result) => {
+  api.storage.local.get([STORAGE_KEY, MODE_KEY], (result) => {
     const enabled = result[STORAGE_KEY] !== false;
+    const mode = result[MODE_KEY] || "normal";
+
     if (enabled) {
+      initPattern(mode);
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", run);
       } else {

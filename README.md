@@ -1,6 +1,6 @@
 # English to Hinglish Replacer — Firefox Extension
 
-Replaces English words on any webpage with their romanized Hindi (Hinglish) equivalents.
+Replaces English words on any webpage with their romanized Hindi (Hinglish) equivalents to help you learn Hindi while browsing.
 
 ---
 
@@ -9,11 +9,36 @@ Replaces English words on any webpage with their romanized Hindi (Hinglish) equi
 ```
 hindi-replacer/
 ├── manifest.json   # Extension metadata and permissions
-├── words.js        # YOUR WORD DATABASE — edit this
-├── content.js      # Runs on every page, does the actual replacement
-├── popup.html      # Browser toolbar popup (on/off toggle)
-└── popup.js        # Popup logic
+├── words.js        # WORD DATABASE — categorized by difficulty
+├── content.js      # Core logic — runs on every page
+├── popup.html      # Browser toolbar UI (on/off toggle & mode selection)
+└── popup.js        # Popup interaction logic
 ```
+
+---
+
+## Difficulty Modes
+
+You can switch between modes via the extension popup to control how much Hindi you see:
+
+- **Easy**: Replaces basic nouns, common verbs, and simple numbers. Great for absolute beginners.
+- **Normal**: Adds complex phrases, greetings, and more advanced vocabulary.
+- **Hard**: (Placeholder) Designed for full-sentence replacements and advanced learning features.
+
+---
+
+## Adding Words
+
+Open `words.js`. You can add words to the appropriate category (`EASY_WORDS`, `NORMAL_WORDS`, or `HARD_WORDS`). 
+
+Entries follow a simple key-value format:
+```js
+"water": "paani",
+```
+- The **key** is the English word or phrase in lowercase.
+- The **value** is the Hinglish replacement.
+
+*Note: Multi-word phrases should be added to `NORMAL_WORDS` or `HARD_WORDS`.*
 
 ---
 
@@ -23,46 +48,20 @@ hindi-replacer/
 2. Click **This Firefox** in the left sidebar
 3. Click **Load Temporary Add-on...**
 4. Navigate to this folder and select `manifest.json`
-5. Done — the extension is now active on all tabs
-
----
-
-## Adding Words
-
-Open `words.js`. Each entry is a simple key-value pair:
-
-```js
-"water": "paani",
-```
-
-- The **key** is the English word in lowercase.
-- The **value** is the Hinglish replacement.
-
----
-
-## Config Options (top of content.js)
-
-| Constant        | Default | Effect |
-|-----------------|---------|--------|
-| `SHOW_TOOLTIP`  | `true`  | Hover over a replaced word to see the original English |
-| `HIGHLIGHT`     | `true`  | Underlines replaced words with an orange dotted border |
+5. Done — the extension is now active.
 
 ---
 
 ## How It Works
 
-1. `words.js` is loaded first — it defines `WORD_MAP`, a plain JS object.
-2. `content.js` builds a single regex from all keys in `WORD_MAP` using word boundaries (`\b`), so only whole words are matched — "sun" won't match inside "Sunday".
-3. The DOM walker skips `<script>`, `<style>`, `<textarea>`, `<input>`, `<code>`, `<pre>` and similar tags to avoid breaking page functionality.
-4. Each matched text node is split into a document fragment: plain text nodes for unmatched parts, and `<span>` elements for replaced words.
+1. **Category Logic**: `content.js` reads your selected mode and builds a replacement map (e.g., "Normal" includes everything in "Easy" + "Normal").
+2. **Smart Matching**: It builds a dynamic regex that ensures only whole words are matched. It uses advanced boundary detection to handle punctuation like commas and apostrophes (e.g., "you're" and "hello," match correctly).
+3. **Safe DOM Walking**: The extension uses a `TreeWalker` to visit text nodes and skips code, inputs, and scripts to avoid breaking websites.
+4. **Auto-Update**: A `MutationObserver` watches for page changes, so words are replaced even as you scroll or new content loads.
 
 ---
 
-## Known Limitations / Next Steps
+## Known Limitations
 
-- The extension now uses a `MutationObserver`. Dynamically injected content (infinite scroll, SPAs) is **automatically** replaced.
-- Improved DOM traversal using `TreeWalker` for better performance and reliability.
-- Phrases are prioritized over individual words (e.g., "good morning" is matched before "good").
-- Unified support for both Firefox (`browser`) and Chrome (`chrome`) APIs.
-- No per-site toggle yet — it's all-or-nothing via the popup.
 - Words inside SVG text, canvas, and shadow DOM are not reached.
+- No per-site toggle yet — it's global via the popup.

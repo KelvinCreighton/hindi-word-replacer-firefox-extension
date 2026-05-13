@@ -56,6 +56,29 @@
       color: #888;
     }
     .count span { color: #e07b39; font-weight: bold; }
+
+    .difficulty-group {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+    }
+    .difficulty-group p {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .difficulty-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .difficulty-group input {
+      accent-color: #e07b39;
+    }
   </style>
 </head>
 <body>
@@ -67,6 +90,13 @@
       <input type="checkbox" id="toggle" checked>
       <span class="slider"></span>
     </label>
+  </div>
+
+  <div class="difficulty-group" id="mode-selector">
+    <p>Difficulty Mode</p>
+    <label><input type="radio" name="mode" value="easy"> Easy (Nouns)</label>
+    <label><input type="radio" name="mode" value="normal" checked> Normal (Phrases)</label>
+    <label><input type="radio" name="mode" value="hard"> Hard (Sentences)</label>
   </div>
 
   <p class="count">
