@@ -79,6 +79,68 @@
     .difficulty-group input {
       accent-color: #e07b39;
     }
+
+    .site-group {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+    }
+    .site-group p {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .site-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .site-group input[type="radio"] {
+      accent-color: #e07b39;
+    }
+    .site-group textarea {
+      width: 100%;
+      min-height: 54px;
+      resize: vertical;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #11111d;
+      color: #eee;
+      font: inherit;
+      font-size: 12px;
+    }
+    .site-group textarea:disabled {
+      opacity: 0.45;
+    }
+    .site-note {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    .site-button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: #e07b39;
+      color: #111;
+      padding: 9px 10px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .site-button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +159,18 @@
     <label><input type="radio" name="mode" value="easy"> Easy (Nouns)</label>
     <label><input type="radio" name="mode" value="normal" checked> Normal (Phrases)</label>
     <label><input type="radio" name="mode" value="hard"> Hard (Sentences)</label>
+  </div>
+
+  <div class="site-group">
+    <p>Site Scope</p>
+    <label><input type="radio" name="site-scope" value="all" checked> All sites except these</label>
+    <textarea id="all-except-list" placeholder="example.com&#10;news.site"></textarea>
+
+    <label><input type="radio" name="site-scope" value="none"> No sites except these</label>
+    <textarea id="none-except-list" placeholder="docs.example.com&#10;wikipedia.org"></textarea>
+
+    <div class="site-note">Current site: <span id="current-site">Loading...</span></div>
+    <button type="button" class="site-button" id="current-site-toggle">Loading...</button>
   </div>
 
   <p class="count">

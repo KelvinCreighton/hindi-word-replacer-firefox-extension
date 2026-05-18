@@ -10,6 +10,7 @@
   const HIGHLIGHT     = true;   // Wrap replaced words in a styled <span>
   const STORAGE_KEY = "hindiReplacerEnabled";
   const MODE_KEY    = "hindiReplacerMode";
+  const SITE_SETTINGS_KEY = "hindiReplacerSiteSettings";
 
   let activeMap = {};
   let pattern = null;
@@ -36,6 +37,44 @@
 
   function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function normalizeHost(host) {
+    return String(host || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^\.+|\.+$/g, "");
+  }
+
+  function getSiteSettings(rawSettings) {
+    const settings = rawSettings && typeof rawSettings === "object" ? rawSettings : {};
+    return {
+      scope: settings.scope === "none" ? "none" : "all",
+      allExcept: Array.isArray(settings.allExcept)
+        ? settings.allExcept.map(normalizeHost).filter(Boolean)
+        : [],
+      noneExcept: Array.isArray(settings.noneExcept)
+        ? settings.noneExcept.map(normalizeHost).filter(Boolean)
+        : []
+    };
+  }
+
+  function hostMatchesList(host, entries) {
+    const normalizedHost = normalizeHost(host);
+    return entries.some((entry) =>
+      normalizedHost === entry || normalizedHost.endsWith(`.${entry}`)
+    );
+  }
+
+  function isSiteEnabled(rawSettings) {
+    const host = normalizeHost(window.location.hostname);
+    if (!host) return true;
+
+    const settings = getSiteSettings(rawSettings);
+    if (settings.scope === "none") {
+      return hostMatchesList(host, settings.noneExcept);
+    }
+    return !hostMatchesList(host, settings.allExcept);
   }
 
   // Tags whose text content we must NOT touch
@@ -196,11 +235,11 @@
   // Use 'chrome' or 'browser' depending on environment
   const api = typeof browser !== "undefined" ? browser : chrome;
 
-  api.storage.local.get([STORAGE_KEY, MODE_KEY], (result) => {
+  api.storage.local.get([STORAGE_KEY, MODE_KEY, SITE_SETTINGS_KEY], (result) => {
     const enabled = result[STORAGE_KEY] !== false;
     const mode = result[MODE_KEY] || "normal";
 
-    if (enabled) {
+    if (enabled && isSiteEnabled(result[SITE_SETTINGS_KEY])) {
       initPattern(mode);
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", run);
