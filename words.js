@@ -127,7 +127,6 @@ const EASY_WORDS = {
   "book":         "kitaab",
   "pen":          "kalam",
   "paper":        "kaagaz",
-  "phone":        "fone",
   "car":          "gaadi",
   "money":        "paisa",
   "name":         "naam",
