@@ -39,6 +39,22 @@
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
+  /**
+   * Matches the case of the original word to the replacement string.
+   */
+  function matchCase(original, replacement) {
+    if (!original || !replacement) return replacement;
+    // Check for all caps (but not single letters like 'A', usually indices/variables)
+    if (original === original.toUpperCase() && original.length > 1) {
+      return replacement.toUpperCase();
+    }
+    // Check for title case
+    if (original[0] === original[0].toUpperCase()) {
+      return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+    }
+    return replacement;
+  }
+
   function normalizeHost(host) {
     return String(host || "")
       .trim()
@@ -131,7 +147,8 @@
 
       // The replacement node
       const span = document.createElement("span");
-      span.textContent = entry;
+      const replacedText = matchCase(word, entry);
+      span.textContent = replacedText;
       span.className = HIGHLIGHT ? "hindi-replacer-word" : "";
       
       if (SHOW_TOOLTIP) {
@@ -140,7 +157,7 @@
 
       // Metadata
       span.setAttribute("data-original", word);
-      span.setAttribute("data-replacement", entry);
+      span.setAttribute("data-replacement", replacedText);
 
       fragment.appendChild(span);
       lastIndex = match.index + word.length;
