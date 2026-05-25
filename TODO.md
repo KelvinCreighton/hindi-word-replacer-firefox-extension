@@ -1,3 +1,1 @@
-- Fix more contractions with 'd, 're, etc. Examples:
-    - "we're" = 'hum're"
-    - "that'd" = "voh'd"
+- All current tasks completed.
