@@ -1,5 +1,1 @@
-- Fix syntax for :i". Currently (wrong):
-    - "i.e" = "main.e"
-    - "i-th" = "main-th"
-    - subscript i
-    - "I'm" = "main'm"
+- All current tasks completed.

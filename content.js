@@ -80,7 +80,8 @@
   // Tags whose text content we must NOT touch
   const SKIP_TAGS = new Set([
     "SCRIPT", "STYLE", "TEXTAREA", "INPUT", "CODE", "PRE",
-    "NOSCRIPT", "IFRAME", "SELECT", "BUTTON", "LABEL"
+    "NOSCRIPT", "IFRAME", "SELECT", "BUTTON", "LABEL",
+    "SUB", "SUP"
   ]);
 
   /**

@@ -134,6 +134,16 @@ const EASY_WORDS = {
 };
 
 const NORMAL_WORDS = {
+  // EXCEPTIONS & CONTRACTIONS
+  "i.e":                 "i.e",
+  "i.e.":                "i.e.",
+  "i-th":                "i-th",
+  "i'm":                 "main hoon",
+  "i've":                "maine",
+  "we've":               "humne",
+  "they've":             "unhone",
+  "you've":              "aapne",
+
   // GREETINGS (PHRASES)
   "good morning":        "suprabhat",
   "good afternoon":      "shubh dopahar",
