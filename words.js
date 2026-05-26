@@ -131,6 +131,23 @@ const EASY_WORDS = {
   "money":        "paisa",
   "name":         "naam",
   "word":         "shabd",
+
+  // BASIC COLOURS
+  "red":          "laal",
+  "green":        "hara",
+  "blue":         "neela",
+  "yellow":       "peela",
+  "black":        "kaala",
+  "white":        "safed",
+
+  // BASIC ANIMALS
+  "animal":       "janwar",
+  "dog":          "kutta",
+  "cat":          "billi",
+  "cow":          "gaay",
+  "horse":        "ghoda",
+  "bird":         "chidiya",
+  "fish":         "machli",
 };
 
 const NORMAL_WORDS = {
@@ -428,7 +445,6 @@ const NORMAL_WORDS = {
   "vegetables":   "sabziyaan",
   "meat":         "maas",
   "chicken":      "murga",
-  "fish":         "machli",
   "egg":          "anda",
   "eggs":         "ande",
   "mango":        "aam",
@@ -460,6 +476,28 @@ const NORMAL_WORDS = {
   "bottle":       "botal",
   "bag":          "thaila",
 
+  // ANIMALS (COMPLEX)
+  "elephant":     "haathi",
+  "lion":         "sher",
+  "tiger":        "baagh",
+  "snake":        "saanp",
+  "rat":          "chooha",
+  "monkey":       "bandar",
+  "donkey":       "gadha",
+  "camel":        "uunt",
+  "bear":         "bhalu",
+  "wolf":         "bhediya",
+  "rabbit":       "khargosh",
+  "deer":         "hiran",
+  "goat":         "bakri",
+  "sheep":        "bhed",
+  "pig":          "suuar",
+  "crow":         "kauwa",
+  "peacock":      "mor",
+  "parrot":       "tota",
+  "eagle":        "cheel",
+  "duck":         "batakh",
+
   // NATURE (COMPLEX)
   "cloud":        "baadal",
   "rain":         "baarish",
@@ -478,17 +516,6 @@ const NORMAL_WORDS = {
   "light":        "roshni",
   "darkness":     "andhera",
   "shadow":       "parchhaaein",
-  "bird":         "chidiya",
-  "animal":       "janwar",
-  "horse":        "ghoda",
-  "cow":          "gaay",
-  "elephant":     "haathi",
-  "lion":         "sher",
-  "tiger":        "baagh",
-  "snake":        "saanp",
-  "dog":          "kutta",
-  "cat":          "billi",
-  "rat":          "chooha",
 
   // PLACES (COMPLEX)
   "room":         "kamra",
@@ -578,6 +605,12 @@ const NORMAL_WORDS = {
   "brown":        "bhoora",
   "golden":       "sona",
   "silver":       "chaandi",
+  "indigo":       "neel",
+  "saffron":      "kesari",
+  "maroon":       "gehra laal",
+  "navy":         "gehra neela",
+  "dark":         "gehra",
+  "bright":       "chamkeela",
 
   // CLOTHES
   "clothes":      "kapde",
