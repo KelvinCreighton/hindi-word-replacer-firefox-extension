@@ -28,9 +28,18 @@
       activeMap = { ...EASY_WORDS, ...NORMAL_WORDS };
     }
 
+    // Add curly quote variants to the map so they match exactly
+    for (const key in activeMap) {
+      if (key.includes("'")) {
+        activeMap[key.replace(/'/g, "’")] = activeMap[key];
+      }
+    }
+
     const keys = Object.keys(activeMap).sort((a, b) => b.length - a.length);
+    // Treat straight and curly apostrophes as part of the word
+    const boundary = "[^a-zA-Z0-9'’]";
     pattern = new RegExp(
-      "(?:^|(?<=[^a-zA-Z0-9]))(" + keys.map(escapeRegex).join("|") + ")(?=[^a-zA-Z0-9]|$)",
+      "(?:^|(?<=" + boundary + "))(" + keys.map(escapeRegex).join("|") + ")(?=" + boundary + "|$)",
       "gi"
     );
   }
