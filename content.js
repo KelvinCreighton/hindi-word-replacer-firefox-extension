@@ -30,13 +30,13 @@
 
     const keys = Object.keys(activeMap).sort((a, b) => b.length - a.length);
     pattern = new RegExp(
-      "(?:^|(?<=[^a-zA-Z0-9'’]))(" + keys.map(escapeRegex).join("|") + ")(?=[^a-zA-Z0-9'’]|$)",
+      "(?:^|(?<=[^a-zA-Z0-9]))(" + keys.map(escapeRegex).join("|") + ")(?=[^a-zA-Z0-9]|$)",
       "gi"
     );
   }
 
   function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]");
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   /**
