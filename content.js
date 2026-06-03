@@ -11,6 +11,7 @@
   const STORAGE_KEY = "hindiReplacerEnabled";
   const MODE_KEY    = "hindiReplacerMode";
   const SITE_SETTINGS_KEY = "hindiReplacerSiteSettings";
+  const PRESET_EXCLUSION_LIST_FILE = "preset-exclusion-list.txt";
 
   let activeMap = {};
   let pattern = null;
@@ -82,6 +83,43 @@
         ? settings.noneExcept.map(normalizeHost).filter(Boolean)
         : []
     };
+  }
+
+  function parsePresetHostList(value) {
+    return Array.from(new Set(
+      String(value || "")
+        .split(/\r?\n/)
+        .map((line) => line.replace(/#.*$/, ""))
+        .flatMap((line) => line.split(/[\s,]+/))
+        .map(normalizeHost)
+        .filter(Boolean)
+    ));
+  }
+
+  async function fetchExtensionText(path) {
+    const response = await fetch(api.runtime.getURL(path));
+    if (!response.ok) {
+      throw new Error(`Unable to load ${path}`);
+    }
+    return response.text();
+  }
+
+  async function mergePresetExclusionList(rawSettings) {
+    const settings = getSiteSettings(rawSettings);
+
+    try {
+      const text = await fetchExtensionText(PRESET_EXCLUSION_LIST_FILE);
+      const presetHosts = parsePresetHostList(text);
+      return {
+        ...settings,
+        allExcept: Array.from(new Set([
+          ...settings.allExcept,
+          ...presetHosts
+        ]))
+      };
+    } catch (error) {
+      return settings;
+    }
   }
 
   function hostMatchesList(host, entries) {
@@ -261,12 +299,24 @@
 
   // Use 'chrome' or 'browser' depending on environment
   const api = typeof browser !== "undefined" ? browser : chrome;
+  const usesPromiseApi = typeof browser !== "undefined" && api === browser;
 
-  api.storage.local.get([STORAGE_KEY, MODE_KEY, SITE_SETTINGS_KEY], (result) => {
+  function getStorage(keys) {
+    if (usesPromiseApi) {
+      return api.storage.local.get(keys);
+    }
+
+    return new Promise((resolve) => {
+      api.storage.local.get(keys, resolve);
+    });
+  }
+
+  getStorage([STORAGE_KEY, MODE_KEY, SITE_SETTINGS_KEY]).then(async (result) => {
     const enabled = result[STORAGE_KEY] !== false;
     const mode = result[MODE_KEY] || "normal";
+    const siteSettings = await mergePresetExclusionList(result[SITE_SETTINGS_KEY]);
 
-    if (enabled && isSiteEnabled(result[SITE_SETTINGS_KEY])) {
+    if (enabled && isSiteEnabled(siteSettings)) {
       initPattern(mode);
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", run);

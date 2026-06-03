@@ -5,6 +5,7 @@
   const STORAGE_KEY = "hindiReplacerEnabled";
   const MODE_KEY    = "hindiReplacerMode";
   const SITE_SETTINGS_KEY = "hindiReplacerSiteSettings";
+  const PRESET_EXCLUSION_LIST_FILE = "preset-exclusion-list.txt";
   const toggle      = document.getElementById("toggle");
   const wordCount   = document.getElementById("word-count");
   const modeRadios  = document.querySelectorAll('input[name="mode"]');
@@ -15,6 +16,7 @@
   const currentSiteToggle = document.getElementById("current-site-toggle");
 
   const api = typeof browser !== "undefined" ? browser : chrome;
+  const usesPromiseApi = typeof browser !== "undefined" && api === browser;
   let activeHostname = "";
   let siteSettings = getDefaultSiteSettings();
 
@@ -74,6 +76,17 @@
     ));
   }
 
+  function parsePresetHostList(value) {
+    return Array.from(new Set(
+      String(value || "")
+        .split(/\r?\n/)
+        .map((line) => line.replace(/#.*$/, ""))
+        .flatMap((line) => line.split(/[\s,]+/))
+        .map(normalizeHost)
+        .filter(Boolean)
+    ));
+  }
+
   function formatHostList(entries) {
     return entries.join("\n");
   }
@@ -124,6 +137,26 @@
     }
   }
 
+  function getStorage(keys) {
+    if (usesPromiseApi) {
+      return api.storage.local.get(keys);
+    }
+
+    return new Promise((resolve) => {
+      api.storage.local.get(keys, resolve);
+    });
+  }
+
+  function setStorage(value) {
+    if (usesPromiseApi) {
+      return api.storage.local.set(value);
+    }
+
+    return new Promise((resolve) => {
+      api.storage.local.set(value, resolve);
+    });
+  }
+
   function syncScopeInputs(settings) {
     scopeRadios.forEach((radio) => {
       radio.checked = radio.value === settings.scope;
@@ -171,14 +204,49 @@
     siteSettings = normalizeSiteSettings(nextSettings);
     syncScopeInputs(siteSettings);
     syncCurrentSiteUI();
-    await api.storage.local.set({ [SITE_SETTINGS_KEY]: siteSettings });
+    await setStorage({ [SITE_SETTINGS_KEY]: siteSettings });
     if (shouldReload) {
       await reloadActiveTab();
     }
   }
 
+  async function fetchExtensionText(path) {
+    const response = await fetch(api.runtime.getURL(path));
+    if (!response.ok) {
+      throw new Error(`Unable to load ${path}`);
+    }
+    return response.text();
+  }
+
+  async function fetchPresetExclusionList() {
+    const text = await fetchExtensionText(PRESET_EXCLUSION_LIST_FILE);
+    return parsePresetHostList(text);
+  }
+
+  async function mergePresetExclusionList(settings) {
+    try {
+      const hosts = await fetchPresetExclusionList();
+      if (!hosts.length) return normalizeSiteSettings(settings);
+
+      const nextSet = new Set(settings.allExcept);
+      hosts.forEach((host) => nextSet.add(host));
+      const nextSettings = normalizeSiteSettings({
+        ...settings,
+        allExcept: Array.from(nextSet)
+      });
+
+      if (nextSettings.allExcept.length !== settings.allExcept.length) {
+        await setStorage({ [SITE_SETTINGS_KEY]: nextSettings });
+      }
+
+      return nextSettings;
+    } catch (error) {
+      return normalizeSiteSettings(settings);
+    }
+  }
+
   // Load current state
-  api.storage.local.get([STORAGE_KEY, MODE_KEY, SITE_SETTINGS_KEY], async (result) => {
+  getStorage([STORAGE_KEY, MODE_KEY, SITE_SETTINGS_KEY]).then(async (result) => {
     if (toggle) {
       toggle.checked = result[STORAGE_KEY] !== false; // default ON
     }
@@ -191,7 +259,9 @@
     });
     updateWordCount(savedMode);
 
-    siteSettings = normalizeSiteSettings(result[SITE_SETTINGS_KEY]);
+    siteSettings = await mergePresetExclusionList(
+      normalizeSiteSettings(result[SITE_SETTINGS_KEY])
+    );
     syncScopeInputs(siteSettings);
     activeHostname = await getActiveTabHostname();
     syncCurrentSiteUI();
@@ -199,13 +269,13 @@
 
   // Save on change
   toggle?.addEventListener("change", () => {
-    api.storage.local.set({ [STORAGE_KEY]: toggle.checked });
+    setStorage({ [STORAGE_KEY]: toggle.checked });
   });
 
   modeRadios.forEach(radio => {
     radio.addEventListener("change", () => {
       if (radio.checked) {
-        api.storage.local.set({ [MODE_KEY]: radio.value });
+        setStorage({ [MODE_KEY]: radio.value });
         updateWordCount(radio.value);
       }
     });

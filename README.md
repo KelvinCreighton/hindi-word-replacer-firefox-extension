@@ -12,7 +12,8 @@ hindi-replacer/
 ├── words.js        # WORD DATABASE — categorized by difficulty
 ├── content.js      # Core logic — runs on every page
 ├── popup.html      # Browser toolbar UI (on/off toggle & mode selection)
-└── popup.js        # Popup interaction logic
+├── popup.js        # Popup interaction logic
+└── preset-exclusion-list.txt
 ```
 
 ---
@@ -39,6 +40,19 @@ Entries follow a simple key-value format:
 - The **value** is the Hinglish replacement.
 
 *Note: Multi-word phrases should be added to `NORMAL_WORDS` or `HARD_WORDS`.*
+
+---
+
+## Adding Preset Exclusions
+
+Preset exclusions live in `preset-exclusion-list.txt` and are loaded automatically as part of the normal "All sites except these" exclusions. Add one hostname per line:
+
+```txt
+example.com
+wikipedia.org
+```
+
+Lines beginning with `#` are ignored.
 
 ---
 
