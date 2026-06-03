@@ -2,3 +2,5 @@ chatgpt.com
 claude.ai
 gemini.google.com
 beartracks.ualberta.ca
+docs.google.com
+drive.google.com
