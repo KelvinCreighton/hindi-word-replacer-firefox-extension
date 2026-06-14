@@ -5,3 +5,4 @@ beartracks.ualberta.ca
 docs.google.com
 drive.google.com
 github.com
+translate.google.com
