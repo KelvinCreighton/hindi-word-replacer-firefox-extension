@@ -4,6 +4,12 @@
   "version": "1.0.0",
   "description": "Replaces English words on webpages with their Hindi equivalents.",
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "hindi-word-replacer@jasper.dev"
+    }
+  },
+
   "permissions": [
     "storage",
     "activeTab",
